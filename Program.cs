@@ -56,12 +56,49 @@ namespace ChannelExamples
                     }).ExecuteAsync().Wait();
             }
         }
+        
+        // This replicates example from: https://gobyexample.com/timeouts
+        static void Timeouts() 
+        {
+            var channel1 = new Channel<String>();
+            Task.Run(async () => {
+                await Task.Delay(2000);
+                await channel1.SendAsync("result 1");
+            });
+            new Select()
+                .OnReceive(channel1, msg => {
+                    Console.WriteLine(msg);
+                })
+                .ExecuteAsync(TimeSpan.FromSeconds(1))
+                .ContinueWith(timedOut => {
+                    if (timedOut.Result) {
+                        Console.WriteLine("timeout 1");
+                    }
+                }).Wait();
+            
+            var channel2 = new Channel<String>();
+            Task.Run(async () => {
+                await Task.Delay(2000);
+                await channel2.SendAsync("result 2");
+            });
+            new Select()
+                .OnReceive(channel2, msg => {
+                    Console.WriteLine(msg);
+                })
+                .ExecuteAsync(TimeSpan.FromSeconds(3))
+                .ContinueWith(timedOut => {
+                    if (timedOut.Result) {
+                        Console.WriteLine("timeout 2");
+                    }
+                }).Wait();
+        }
 
         static void Main(string[] args)
         {
             SimpleMessage();
             ChannelSychronization();
             Select();
+            Timeouts();
         }
     }
 }
