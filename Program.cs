@@ -92,6 +92,26 @@ namespace ChannelExamples
                     }
                 }).Wait();
         }
+        
+        // This replicates example from: https://gobyexample.com/non-blocking-channel-operations
+        static void NonBlockingChannels()
+        {
+            var messages = new Channel<String>();
+
+            String message;
+            if (messages.TryReceive(out message)) {
+                Console.WriteLine("received message " + message);
+            } else {
+                Console.WriteLine("no message received");
+            }
+
+            message = "hi";
+            if (messages.TrySend(message)) {
+                Console.WriteLine("sent message ", message);
+            } else {
+                Console.WriteLine("no message sent");
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -99,6 +119,7 @@ namespace ChannelExamples
             ChannelSychronization();
             Select();
             Timeouts();
+            NonBlockingChannels();
         }
     }
 }
